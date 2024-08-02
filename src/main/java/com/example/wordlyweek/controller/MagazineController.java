@@ -15,6 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.wordlyweek.model.Magazine;
 import com.example.wordlyweek.model.Writer;
 import com.example.wordlyweek.service.MagazineJpaService;
+import org.springframework.web.bind.annotation.PutMapping;
 
 ;
 
@@ -46,6 +47,11 @@ public class MagazineController {
     public void deleteMagazine(@PathVariable int magazineId) {
         magazineJpaService.deleteMagazine(magazineId);
         throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/magazines/{id}")
+    public Magazine updateMagazine(@PathVariable int id, @RequestBody Magazine magazine) {
+        return magazineJpaService.updateMagazine(id, magazine);
     }
 
     @GetMapping("/magazines/{magazineId}/writers")
