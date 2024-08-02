@@ -23,7 +23,7 @@ public class WriterJpaService implements WriterRepository {
 
     @Autowired
     private WriterJpaRepository writerJpaRepository;
-    @Autowired 
+    @Autowired
     private MagazineJpaRepository magazineJpaRepository;
 
     @Override
@@ -35,6 +35,15 @@ public class WriterJpaService implements WriterRepository {
     @Override
     public Writer addWriter(Writer writer) {
         writer.setWriterId(0);
+        List<Integer> magazineIds = new ArrayList<>();
+        for (Magazine i : writer.getMagazines()) {
+            magazineIds.add(i.getMagazineId());
+        }
+        List<Magazine> completeMagazines = magazineJpaRepository.findAllById(magazineIds);
+        if (magazineIds.size() != completeMagazines.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some magazines are not found");
+        }
+        writer.setMagazines(completeMagazines);
         writerJpaRepository.save(writer);
         return writer;
     }
@@ -61,7 +70,7 @@ public class WriterJpaService implements WriterRepository {
             }
             if (writer.getMagazines() != null) {
                 List<Integer> magazineIds = new ArrayList<>();
-                for(Magazine i : writer.getMagazines()) {
+                for (Magazine i : writer.getMagazines()) {
                     magazineIds.add(i.getMagazineId());
                 }
                 List<Magazine> completeMagazines = magazineJpaRepository.findAllById(magazineIds);
@@ -82,7 +91,7 @@ public class WriterJpaService implements WriterRepository {
         try {
             Writer writer = writerJpaRepository.findById(writerId).get();
             List<Magazine> magazines = writer.getMagazines();
-            for(Magazine i : magazines) {
+            for (Magazine i : magazines) {
                 i.getWriters().remove(writer);
             }
             magazineJpaRepository.saveAll(magazines);
@@ -102,5 +111,4 @@ public class WriterJpaService implements WriterRepository {
         }
     }
 
-    
 }

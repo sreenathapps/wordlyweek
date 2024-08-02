@@ -35,6 +35,15 @@ public class MagazineJpaService implements MagazineRepository {
     @Override
     public Magazine addMagazine(Magazine magazine) {
         magazine.setMagazineId(0);
+        List<Integer> writerIds = new ArrayList<>();
+        for (Writer writer : magazine.getWriters()) {
+            writerIds.add(writer.getWriterId());
+        }
+        List<Writer> completeWriters = writerJpaRepository.findAllById(writerIds);
+        magazine.setWriters(completeWriters);
+        if (writerIds.size() != completeWriters.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some writers are not found");
+        }
         magazineJpaRepository.save(magazine);
         return magazine;
     }
