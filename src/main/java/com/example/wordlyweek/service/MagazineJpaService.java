@@ -95,6 +95,11 @@ public class MagazineJpaService implements MagazineRepository {
                 if (writerIds.size() != newWriters.size()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
                 }
+                for (Writer w : newWriters) {
+                    w.getMagazines().add(newMagazine);
+                }
+
+                writerJpaRepository.saveAll(newWriters);
 
                 newMagazine.setWriters(newWriters);
             }
