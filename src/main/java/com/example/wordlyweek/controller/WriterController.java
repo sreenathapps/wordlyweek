@@ -3,20 +3,11 @@ package com.example.wordlyweek.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.example.wordlyweek.model.Magazine;
-import com.example.wordlyweek.model.Writer;
+import com.example.wordlyweek.model.*;
 import com.example.wordlyweek.service.WriterJpaService;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * WriterController
@@ -47,14 +38,13 @@ public class WriterController {
     }
 
     @DeleteMapping("/magazines/writers/{writerId}")
-    public void delteWriter(@PathVariable("writerId") int writerId) {
+    public void deleteWriter(@PathVariable("writerId") int writerId) {
         writerJpaService.deleteWriter(writerId);
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("/writers/{writerId}/magazines")
-    public List<Magazine> getWriterMagazines(@PathVariable("magazineId") int magazineId) {
-        return writerJpaService.getWriterMagazines(magazineId);
+    public List<Magazine> getWriterMagazines(@PathVariable("writerId") int writerId) {
+        return writerJpaService.getWriterMagazines(writerId);
     }
 
 }

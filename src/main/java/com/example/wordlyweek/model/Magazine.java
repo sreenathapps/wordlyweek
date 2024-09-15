@@ -1,16 +1,9 @@
 package com.example.wordlyweek.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -26,10 +19,9 @@ public class Magazine {
     @Column(name = "publicationdate")
     private String publicationDate;
 
-    @ManyToMany
-    @JoinTable(name = "writer_magazine", joinColumns = @JoinColumn(name = "magazineid"), inverseJoinColumns = @JoinColumn(name = "writerid"))
+    @ManyToMany(mappedBy = "magazines")
     @JsonIgnoreProperties("magazines")
-    private List<Writer> writers;
+    private List<Writer> writers = new ArrayList<>();
 
     public Magazine(int magazineId, String magazineName, String publicationDate, List<Writer> writers) {
         this.magazineId = magazineId;

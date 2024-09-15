@@ -1,19 +1,14 @@
 package com.example.wordlyweek.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.wordlyweek.model.Magazine;
-import com.example.wordlyweek.model.Writer;
-import com.example.wordlyweek.repository.MagazineJpaRepository;
-import com.example.wordlyweek.repository.WriterJpaRepository;
-import com.example.wordlyweek.repository.WriterRepository;
+import com.example.wordlyweek.model.*;
+import com.example.wordlyweek.repository.*;
 
 /**
  * WriterJpaService
@@ -28,31 +23,31 @@ public class WriterJpaService implements WriterRepository {
 
     @Override
     public List<Writer> getWriters() {
-        List<Writer> writers = writerJpaRepository.findAll();
-        return writers;
+        return writerJpaRepository.findAll();
     }
 
     @Override
     public Writer addWriter(Writer writer) {
-        writer.setWriterId(0);
-        List<Integer> magazineIds = new ArrayList<>();
-        for (Magazine i : writer.getMagazines()) {
-            magazineIds.add(i.getMagazineId());
+        try {
+            List<Integer> magazineIds = new ArrayList<>();
+            for (Magazine m : writer.getMagazines()) {
+                magazineIds.add(m.getMagazineId());
+            }
+            List<Magazine> magazines = magazineJpaRepository.findAllById(magazineIds);
+            if (magazineIds.size() != magazines.size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some of magazines are not found");
+            }
+            writer.setMagazines(magazines);
+            return writerJpaRepository.save(writer);
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        List<Magazine> completeMagazines = magazineJpaRepository.findAllById(magazineIds);
-        if (magazineIds.size() != completeMagazines.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some magazines are not found");
-        }
-        writer.setMagazines(completeMagazines);
-        writerJpaRepository.save(writer);
-        return writer;
     }
 
     @Override
     public Writer getWriterById(int writerId) {
         try {
-            Writer writer = writerJpaRepository.findById(writerId).get();
-            return writer;
+            return writerJpaRepository.findById(writerId).get();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -79,8 +74,8 @@ public class WriterJpaService implements WriterRepository {
                 }
                 newWriter.setMagazines(completeMagazines);
             }
-            writerJpaRepository.save(newWriter);
-            return newWriter;
+           return writerJpaRepository.save(newWriter);
+            
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }

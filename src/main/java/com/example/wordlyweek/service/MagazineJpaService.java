@@ -34,25 +34,36 @@ public class MagazineJpaService implements MagazineRepository {
 
     @Override
     public Magazine addMagazine(Magazine magazine) {
-        magazine.setMagazineId(0);
-        List<Integer> writerIds = new ArrayList<>();
-        for (Writer writer : magazine.getWriters()) {
-            writerIds.add(writer.getWriterId());
+        try {
+            List<Integer> writerIds = new ArrayList<>();
+            for(Writer w : magazine.getWriters()) {
+                writerIds.add(w.getWriterId());
+            }
+            List<Writer> writers = writerJpaRepository.findAllById(writerIds);
+            if (writerIds.size() != writers.size()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some of authors are not been found");
+            }
+            magazine.setWriters(writers);
+
+            for (Writer w : writers) {
+                w.getMagazines().add(magazine);
+            }
+
+            Magazine savedMagazine = magazineJpaRepository.save(magazine);
+
+            writerJpaRepository.saveAll(writers);
+
+            return savedMagazine;
+
+        } catch (NoSuchElementException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        List<Writer> completeWriters = writerJpaRepository.findAllById(writerIds);
-        magazine.setWriters(completeWriters);
-        if (writerIds.size() != completeWriters.size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some writers are not found");
-        }
-        magazineJpaRepository.save(magazine);
-        return magazine;
     }
 
     @Override
     public Magazine getMagazineById(int magazineId) {
         try {
-            Magazine magazine = magazineJpaRepository.findById(magazineId).get();
-            return magazine;
+            return magazineJpaRepository.findById(magazineId).get();
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -69,19 +80,25 @@ public class MagazineJpaService implements MagazineRepository {
                 newMagazine.setPublicationDate(magazine.getPublicationDate());
             }
             if (magazine.getWriters() != null) {
+                List<Writer> writers = newMagazine.getWriters();
+                for (Writer w : writers) {
+                    w.getMagazines().remove(newMagazine);
+                }
+                writerJpaRepository.saveAll(writers);
+
                 List<Integer> writerIds = new ArrayList<>();
-                for (Writer writer : magazine.getWriters()) {
-                    writerIds.add(writer.getWriterId());
+                for (Writer w : magazine.getWriters()) {
+                    writerIds.add(w.getWriterId());
                 }
-                List<Writer> completeWriters = new ArrayList<>();
-                completeWriters = writerJpaRepository.findAllById(writerIds);
-                if (writerIds.size() != completeWriters.size()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Some of writers are not found");
+                List<Writer> newWriters = writerJpaRepository.findAllById(writerIds);
+
+                if (writerIds.size() != newWriters.size()) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
                 }
-                newMagazine.setWriters(completeWriters);
+
+                newMagazine.setWriters(newWriters);
             }
-            magazineJpaRepository.save(newMagazine);
-            return newMagazine;
+            return magazineJpaRepository.save(newMagazine);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -101,6 +118,7 @@ public class MagazineJpaService implements MagazineRepository {
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     @Override
