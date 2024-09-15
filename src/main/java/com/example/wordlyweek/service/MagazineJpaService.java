@@ -120,10 +120,9 @@ public class MagazineJpaService implements MagazineRepository {
             writerJpaRepository.saveAll(writers);
 
             magazineJpaRepository.deleteById(magazineId);
-        } catch (Exception e) {
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     @Override
