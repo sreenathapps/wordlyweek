@@ -9,11 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.wordlyweek.model.Magazine;
-import com.example.wordlyweek.model.Writer;
-import com.example.wordlyweek.repository.MagazineJpaRepository;
-import com.example.wordlyweek.repository.MagazineRepository;
-import com.example.wordlyweek.repository.WriterJpaRepository;
+import com.example.wordlyweek.model.*;
+import com.example.wordlyweek.repository.*;
 
 /**
  * MagazineJpaService
@@ -119,10 +116,11 @@ public class MagazineJpaService implements MagazineRepository {
             }
             writerJpaRepository.saveAll(writers);
 
-            magazineJpaRepository.deleteById(magazineId);
+            magazineJpaRepository.delete(magazine);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
+        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
     }
 
     @Override
