@@ -37,6 +37,7 @@ public class MagazineController {
     }
 
     @DeleteMapping("/magazines/{magazineId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteMagazine(@PathVariable int magazineId) {
         magazineJpaService.deleteMagazine(magazineId);
     }

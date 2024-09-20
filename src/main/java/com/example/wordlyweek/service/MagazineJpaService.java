@@ -3,6 +3,7 @@ package com.example.wordlyweek.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -108,19 +109,16 @@ public class MagazineJpaService implements MagazineRepository {
 
     @Override
     public void deleteMagazine(int magazineId) {
-        try {
-            Magazine magazine = magazineJpaRepository.findById(magazineId).get();
-            List<Writer> writers = magazine.getWriters();
-            for (Writer i : writers) {
-                i.getMagazines().remove(magazine);
-            }
-            writerJpaRepository.saveAll(writers);
+        Magazine magazine = magazineJpaRepository.findById(magazineId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "The magazine is not Found")
+        );
+        List<Writer> writers = magazine.getWriters();
+        for (Writer w : writers) {
+            w.getMagazines().remove(magazine);
+        };
+        writerJpaRepository.saveAll(writers);
 
-            magazineJpaRepository.delete(magazine);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        magazineJpaRepository.delete(magazine);
     }
 
     @Override
